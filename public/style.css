@@ -304,6 +304,8 @@ button.tile.sel { background: var(--accent); color: var(--accent-ink); border-co
 .legend { font-size: 0.85rem; color: var(--muted); }
 .legend .lt { width: 22px; height: 24px; font-size: 0.8rem; vertical-align: middle; }
 
+.switch { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); margin: -4px 0 6px; cursor: pointer; }
+.switch input { width: 18px; height: 18px; accent-color: var(--accent); margin: 0; }
 .clue-group { padding: 10px 0; border-top: 1px solid var(--line); }
 .clue-group:first-of-type { border-top: 0; }
 .cg-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
@@ -353,6 +355,7 @@ button.tile.sel { background: var(--accent); color: var(--accent-ink); border-co
 .gcell.auto.v-o { opacity: 1; border-style: solid; }
 
 .journal { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 0.92rem; }
+.journal-group { list-style: none; margin: 0; padding: 0 0 6px; display: grid; gap: 6px; border-bottom: 1px solid var(--line); }
 .journal .w { font-family: var(--serif); letter-spacing: 0.06em; }
 .journal .sep { display: block; font-weight: 700; color: var(--muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; padding-top: 6px; }
 

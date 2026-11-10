@@ -22,6 +22,7 @@
   let token = store.get('lc_token');
   let helloPending = false;
   let tab = store.get('lc_tab') || 'indices';
+  let helper = store.get('lc_helper') !== 'off'; // aide au calcul sous chaque réponse
   let ui = freshUi();
 
   function freshUi(keep = {}) {
@@ -555,7 +556,7 @@
         return `<li class="rank r${row.rank}">
           <span class="rk">${row.rank}</span>
           <span class="rk-name">${who(row.pid)}</span>
-          <span class="pts">${row.total}<small> pts</small></span>
+          <span class="pts">${row.total}<small> ${row.total > 1 ? "pts" : "pt"}</small></span>
           <span class="breakdown">Mystère ${pr[4].pts} + ${pr[5].pts} + ${pr[6].pts} · Mains ${row.handPts} · Bonus ${row.bonus}${row.reveals ? ` · ${row.reveals} ${plural(row.reveals, 'carte révélée', 'cartes révélées')}` : ''}</span>
         </li>`;
       })
@@ -566,12 +567,12 @@
     const detail = R.rows
       .map((row) => {
         const guesses = [4, 5, 6]
-          .map((r) => `<div class="sum-row"><span class="muted">Manche ${r}</span><div class="tiles">${(row.perRound[r].letters || []).map((l) => tile(l, `sm ${mystery.has(l) ? 'good' : 'wrong'}`)).join('') || '<span class="muted">—</span>'}</div><span class="muted small">${row.perRound[r].pts} pts</span></div>`)
+          .map((r) => `<div class="sum-row"><span class="muted">Manche ${r}</span><div class="tiles">${(row.perRound[r].letters || []).map((l) => tile(l, `sm ${mystery.has(l) ? 'good' : 'wrong'}`)).join('') || '<span class="muted">—</span>'}</div><span class="muted small">${row.perRound[r].pts} ${row.perRound[r].pts > 1 ? "pts" : "pt"}</span></div>`)
           .join('');
         const hands = Object.entries(row.hands)
-          .map(([pid, h]) => `<div class="sum-row"><span>Main de ${who(pid)}</span><div class="tiles">${h.letters.map((l) => tile(l, `sm ${R.hands[pid].includes(l) ? 'good' : 'wrong'}`)).join('') || '<span class="muted">—</span>'}</div><span class="muted small">${h.correct.length}${h.full ? ' +1' : ''} pts</span></div>`)
+          .map(([pid, h]) => `<div class="sum-row"><span>Main de ${who(pid)}</span><div class="tiles">${h.letters.map((l) => tile(l, `sm ${R.hands[pid].includes(l) ? 'good' : 'wrong'}`)).join('') || '<span class="muted">—</span>'}</div><span class="muted small">${h.correct.length + (h.full ? 1 : 0)} ${h.correct.length + (h.full ? 1 : 0) > 1 ? "pts" : "pt"}</span></div>`)
           .join('');
-        return `<details><summary>${who(row.pid)} · ${row.total} pts</summary>${guesses}${hands}</details>`;
+        return `<details><summary>${who(row.pid)} · ${row.total} ${row.total > 1 ? "pts" : "pt"}</summary>${guesses}${hands}</details>`;
       })
       .join('');
     return `<section class="card action results">
@@ -657,6 +658,7 @@
   }
 
   function restInfo(F, col, e) {
+    if (!helper) return '';
     const cs = [...e.word].map((l) => cell(F, col, l).v);
     const yes = cs.filter((v) => v === 'o').length;
     const unk = cs.filter((v) => v === '' || v === '?').length;
@@ -697,7 +699,9 @@
         </div>`;
       })
       .join('');
-    return `<p class="legend">Touche une lettre pour l’annoter : <span class="lt v-x">✕</span> pas chez ce joueur, <span class="lt v-o">✓</span> chez lui, <span class="lt v-q">?</span> doute. Ce qui est certain (ta main, cartes révélées ou vues) est rempli automatiquement.</p>${groups}`;
+    return `<p class="legend">Touche une lettre pour l’annoter : <span class="lt v-x">✕</span> pas chez ce joueur, <span class="lt v-o">✓</span> chez lui, <span class="lt v-q">?</span> doute. Ce qui est certain (ta main, cartes révélées ou vues) est rempli automatiquement.</p>
+      <label class="switch"><input type="checkbox" data-action="helper" ${helper ? 'checked' : ''}> Aide au calcul sous chaque réponse (« encore 1 parmi 3 »)</label>
+      ${groups}`;
   }
 
   function carnetTab(F) {
@@ -727,7 +731,7 @@
   function logLine(e) {
     const w = (x) => `<b class="w">${esc(x)}</b>`;
     switch (e.k) {
-      case 'start': return `${who(e.pid)} commence. Chacun annonce son mot d’ouverture.`;
+      case 'start': return `<span class="sep">Ouverture</span>${who(e.pid)} commence. Chacun annonce son mot d’ouverture.`;
       case 'clue': return `${who(e.pid)} ouvre avec ${w(e.word)} → <b>${e.count}</b>`;
       case 'round': return `<span class="sep">Manche ${e.round}</span>`;
       case 'ask': return `${who(e.from)} → ${who(e.to)} : ${w(e.word)} → <b>${e.count}</b>`;
@@ -745,8 +749,17 @@
   }
 
   function journalTab() {
-    const items = [...(S.log || [])].reverse().map((e) => `<li>${logLine(e)}</li>`).join('');
-    return `<ol class="journal">${items || '<li class="muted">Rien pour l’instant.</li>'}</ol>`;
+    // une section par manche, la plus récente en haut, chronologique à l’intérieur
+    const groups = [];
+    for (const e of S.log || []) {
+      if (e.k === 'start' || e.k === 'round' || !groups.length) groups.push([]);
+      groups[groups.length - 1].push(e);
+    }
+    const html = groups
+      .reverse()
+      .map((g) => `<li><ol class="journal-group">${g.map((e) => `<li>${logLine(e)}</li>`).join('')}</ol></li>`)
+      .join('');
+    return `<ol class="journal">${html || '<li class="muted">Rien pour l’instant.</li>'}</ol>`;
   }
 
   function rulesHtml() {
@@ -795,6 +808,11 @@
     const pid = b.dataset.pid;
     const l = b.dataset.l;
     switch (a) {
+      case 'helper':
+        helper = b.checked;
+        store.set('lc_helper', helper ? 'on' : 'off');
+        render();
+        break;
       case 'tab':
         tab = b.dataset.tab;
         store.set('lc_tab', tab);
