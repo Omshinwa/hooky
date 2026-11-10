@@ -1,0 +1,13 @@
+{
+  "name": "lettres-cachees",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jeu de déduction en ligne avec des mots de 5 lettres (3 à 5 joueurs).",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node test/simulate.js"
+  },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" }
+}
