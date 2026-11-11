@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: lettres-cachees
+    name: hooky
     runtime: node
     plan: free
     buildCommand: npm install

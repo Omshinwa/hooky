@@ -14,14 +14,14 @@ npm test           # plays 6 full bot games and checks rules + scoring
 
 ## Deploy on Render (free)
 
-1. Create an **empty** GitHub repository (e.g. `lettres-cachees`), then push this folder:
+1. Create an **empty** GitHub repository (e.g. `hooky`), then push this folder:
    ```bash
-   git remote add origin https://github.com/<you>/lettres-cachees.git
+   git remote add origin https://github.com/<you>/hooky.git
    git push -u origin main
    ```
 2. On https://dashboard.render.com: **New → Blueprint**, pick the repository. Render reads `render.yaml` (free Node web service) and deploys.
    *(Alternative: New → Web Service, Build `npm install`, Start `npm start`, plan Free.)*
-3. Share the `https://lettres-cachees-xxxx.onrender.com` URL with your friends.
+3. Share the `https://hooky-xxxx.onrender.com` URL with your friends.
 
 ### Free-tier notes
 
