@@ -172,12 +172,14 @@ input::placeholder { color: var(--muted); }
 .tile.slot { background: transparent; border: 1.5px dashed var(--line); box-shadow: none; }
 .hand { min-height: 44px; }
 
-.keys { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 16px; }
-@media (min-width: 440px) { .keys { grid-template-columns: repeat(9, 1fr); } }
+/* 6 keys per row on phones (~48px each), 9 on wider screens; the last row is centred. */
+.keys { --cols: 6; --gap: 7px; display: flex; flex-wrap: wrap; justify-content: center; gap: var(--gap); margin-top: 16px; }
+@media (min-width: 440px) { .keys { --cols: 9; --gap: 6px; } }
 .key {
+  flex: 0 0 calc((100% - (var(--cols) - 1) * var(--gap)) / var(--cols));
   appearance: none; aspect-ratio: 1; padding: 0; cursor: pointer;
-  border: 1.5px solid var(--line); background: var(--surface-2); border-radius: 10px;
-  font-family: var(--serif); font-weight: 700; font-size: 1.2rem;
+  border: 1.5px solid var(--line); background: var(--surface-2); border-radius: 12px;
+  font-family: var(--serif); font-weight: 700; font-size: 1.4rem;
 }
 .key.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 
