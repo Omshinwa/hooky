@@ -127,7 +127,7 @@
     if (word.length !== WORD_LENGTH) {
       return playError(
         word.length
-          ? `“${word}” has ${plural(word.length, 'letter')}. Words have ${WORD_LENGTH}.`
+          ? `“${word}” is too short. Words have ${WORD_LENGTH} letters.`
           : `Type a ${WORD_LENGTH}-letter word.`,
       );
     }
@@ -251,6 +251,7 @@
   app.addEventListener('input', (e) => {
     if (e.target.id === 'name' && ui.form) ui.form.name = e.target.value;
     if (e.target.id === 'word') {
+      if (!e.isComposing) cleanWordInput(e.target);
       ui.word = e.target.value;
       if (ui.error) {
         ui.error = '';
@@ -258,6 +259,19 @@
       }
     }
   });
+
+  // Keyboards that compose characters (accents, some mobile IMEs) finish here.
+  app.addEventListener('compositionend', (e) => {
+    if (e.target.id !== 'word') return;
+    cleanWordInput(e.target);
+    ui.word = e.target.value;
+  });
+
+  // Letters only, uppercase, never more than WORD_LENGTH.
+  function cleanWordInput(input) {
+    const clean = normalizeWord(input.value).slice(0, WORD_LENGTH);
+    if (input.value !== clean) input.value = clean;
+  }
 
   app.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
@@ -322,6 +336,7 @@
               `<button class="seg-btn${c === n ? ' on' : ''}" role="radio" aria-checked="${c === n}" data-action="count" data-n="${c}">${c}</button>`,
           ).join('')}
         </div>
+        <p class="muted small center">With ${n} players, everyone is dealt ${HAND_SIZE[n]} letters.</p>
         <button class="btn primary big" data-action="begin">Enter the hands</button>
       </section>`;
   }
@@ -435,7 +450,7 @@
       ${confirmEnd}
       <section class="card">
         <label class="lbl first" for="word">Word</label>
-        <input id="word" class="word-input" value="${esc(ui.word)}" maxlength="24" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="${WORD_LENGTH} letters" enterkeyhint="go">
+        <input id="word" class="word-input" value="${esc(ui.word)}" maxlength="${WORD_LENGTH}" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" placeholder="${WORD_LENGTH} letters" enterkeyhint="go">
         <span class="lbl">Who answers?</span>
         <div class="chips">
           ${state.players
