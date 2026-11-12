@@ -1,38 +1,40 @@
-# Lettres Cachées
+# Hooky Helper
 
-Online word-deduction game for 3–5 players, with a French UI. The server deals the cards, keeps every hand secret and computes every answer, so nobody can miscount.
+A small pass-the-device helper for Hooky. Players still play on paper. The helper does two things:
 
-Only one game runs at a time. Everyone opens the same URL.
+- keeps every player's letters secret, and
+- answers "how many of Bob's letters are in this word?" without counting mistakes.
+
+It's a static page (HTML, CSS and JS, no server). Everything is saved in the browser's `localStorage`, so reloading the page doesn't lose the game.
+
+## How it works
+
+1. **Players.** Choose the number of players (3–5).
+2. **Hands.** Pass the device around. Each player types their name and taps the letters they were dealt: exactly 7, 5 or 4 for 3, 4 or 5 players. Their letters are hidden as soon as they tap **Done**.
+3. **Check.** The helper warns if two players entered the same letter. It names the two players but not the letter. Each of them taps **Fix** to correct their hand in private.
+4. **Play.** Type a 5-letter word, pick who answers, tap **Check**. The helper shows the count. Every occurrence counts: holding E and N, NEVER scores 3. Each answer is added to the history.
+5. **End game** at any time reveals everyone's letters.
+
+The helper doesn't know the playground or the hooky letters.
 
 ## Run locally
 
+Open `index.html` in a browser, or serve the folder:
+
 ```bash
-npm install
-npm start          # http://localhost:3000
-npm test           # plays 6 full bot games and checks rules + scoring
+python3 -m http.server 8000   # http://localhost:8000
 ```
 
-## Deploy on Render (free)
+Tests for the counting and duplicate-letter logic (Node 18+):
 
-1. Create an **empty** GitHub repository (e.g. `hooky`), then push this folder:
-   ```bash
-   git remote add origin https://github.com/<you>/hooky.git
-   git push -u origin main
-   ```
-2. On https://dashboard.render.com: **New → Blueprint**, pick the repository. Render reads `render.yaml` (free Node web service) and deploys.
-   *(Alternative: New → Web Service, Build `npm install`, Start `npm start`, plan Free.)*
-3. Share the `https://hooky-xxxx.onrender.com` URL with your friends.
+```bash
+node --test
+```
 
-### Free-tier notes
+## Publish on GitHub Pages
 
-- The service sleeps after 15 minutes with no visitors. The first visit then takes about 1 minute to wake it up. Open the link a minute before you play.
-- While at least one player has the page open, the page pings the server so it stays awake during a game.
-- The game is kept in memory: a redeploy or a sleep **ends the current game**.
+1. Push to GitHub.
+2. In the repository: **Settings → Pages → Build and deployment**, source **Deploy from a branch**, branch `main`, folder `/ (root)`.
+3. The helper is live at `https://<user>.github.io/hooky/` after a minute.
 
-## How it plays
-
-- Join with a first name in the lobby, arrange the seat order, then press **Lancer la partie** (3–5 players).
-- Each player gets a 4-digit **reconnection code**, shown under their hand. Opening the link on another device and entering the code gives them their seat back.
-- The **Indices** tab lists every answer, grouped by player. Tap a letter to mark it ✕ / ✓ / ?.
-- The **Carnet** tab is the deduction grid. Certain facts fill in automatically: your hand, revealed cards, cards you peeked at, and Centre cards.
-- Words are not dictionary-checked. Any 5 letters are accepted and the table validates the word out loud. Accents are folded (É → E, Œ → OE).
+Any other static host (Netlify, Cloudflare Pages, Vercel…) works the same way: there's no build step.
