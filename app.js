@@ -311,8 +311,8 @@
     const n = state.count;
     return `
       <section class="card">
-        <p class="lead">Each player enters the letters they were dealt, in secret. During the game, type a word and pick a player: the helper tells you how many of their letters the word contains.</p>
-        <p class="muted small">Keep your paper for notes. The helper doesn't know the playground or the hooky letters.</p>
+        <p class="lead">Because we're too dumb to count letters</p>
+        <p class="muted small">It's just a helper for the game 'hooky'!</p>
       </section>
       <section class="card">
         <h2>How many players?</h2>
@@ -322,7 +322,6 @@
               `<button class="seg-btn${c === n ? ' on' : ''}" role="radio" aria-checked="${c === n}" data-action="count" data-n="${c}">${c}</button>`,
           ).join('')}
         </div>
-        <p class="muted small center">With ${n} players, everyone is dealt ${HAND_SIZE[n]} letters.</p>
         <button class="btn primary big" data-action="begin">Enter the hands</button>
       </section>`;
   }
